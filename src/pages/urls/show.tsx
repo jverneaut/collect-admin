@@ -58,7 +58,7 @@ export const UrlShow: React.FC = () => {
           <Descriptions.Item label="Latest technologies">{technologies.length ? technologies.join(" · ") : "-"}</Descriptions.Item>
         </Descriptions>
 
-        <UrlCrawlExplorer urlId={urlId} />
+        <UrlCrawlExplorer urlId={urlId} pollIntervalMs={2000} />
       </Space>
     </Show>
   );

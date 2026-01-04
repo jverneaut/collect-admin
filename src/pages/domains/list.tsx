@@ -15,6 +15,7 @@ export const DomainList: React.FC = () => {
     filters: searchValue.trim()
       ? [{ field: "search", operator: "contains", value: searchValue.trim() }]
       : [],
+    queryOptions: { refetchInterval: 5000 },
   });
 
   const items = useMemo(() => result.data ?? [], [result.data]);
@@ -46,6 +47,7 @@ export const DomainList: React.FC = () => {
 
           const title = domain.profile?.name ?? domain.displayName ?? domain.host;
           const description = domain.profile?.description ?? null;
+          const screenshotSrc = homepageCrawl?.screenshots?.[0]?.publicUrl ?? undefined;
 
           return (
             <AntdList.Item key={domain.id}>
@@ -53,9 +55,11 @@ export const DomainList: React.FC = () => {
                 title={title}
                 url={domain.canonicalUrl}
                 description={description}
+                screenshotSrc={screenshotSrc}
                 tags={[
                   homepageCrawl?.status ? { label: `crawl: ${homepageCrawl.status}`, color: homepageCrawl.status === "SUCCESS" ? "green" : "default" } : { label: "crawl: n/a" },
                   ...(categories.length ? [{ label: categories.slice(0, 2).join(" · ") }] : []),
+                  { label: `urls: ${domain.urlsCount ?? 0}` },
                 ]}
                 onClick={() => show("domains", domain.id)}
                 extra={

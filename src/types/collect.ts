@@ -39,6 +39,19 @@ export type Screenshot = {
   createdAt: string;
 };
 
+export type Job = {
+  id: string;
+  type: string;
+  status: "QUEUED" | "RUNNING" | "SUCCEEDED" | "FAILED" | string;
+  input: unknown;
+  progress?: unknown;
+  createdAt: string;
+  startedAt?: string | null;
+  finishedAt?: string | null;
+  result?: unknown;
+  error?: { message?: string } | null;
+};
+
 export type CrawlTask = {
   id: string;
   crawlId: string;
@@ -108,10 +121,20 @@ export type Domain = {
   displayName?: string | null;
   createdAt: string;
   updatedAt: string;
+  urlsCount?: number;
   profile?: DomainProfile | null;
+  derived?: {
+    homepageUrl: Url | null;
+    homepageLatestCrawl: UrlCrawl | null;
+    primaryCategory: Category | null;
+    categories: Category[];
+    technologies: Technology[];
+    screenshot: Screenshot | null;
+  };
   urls?: Url[];
 };
 
 export type DomainWithHomepage = Domain & {
   homepage?: (Url & { crawls?: UrlCrawl[] }) | null;
+  urlsCount?: number;
 };

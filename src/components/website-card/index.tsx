@@ -1,5 +1,6 @@
 import { Card, Space, Tag, Typography } from "antd";
 import React from "react";
+import { getDisplayImageSrc } from "../../lib/media";
 
 type WebsiteCardTag = {
   label: string;
@@ -20,20 +21,26 @@ export const WebsiteCard: React.FC<WebsiteCardProps> = ({
   title,
   url,
   description,
-  screenshotSrc = "/placeholder-site.svg",
+  screenshotSrc,
   tags = [],
   extra,
   onClick,
 }) => {
+  const imgSrc = getDisplayImageSrc(screenshotSrc);
   return (
     <Card
       hoverable={!!onClick}
       onClick={onClick}
       cover={
         <img
-          src={screenshotSrc}
+          src={imgSrc}
           alt={`Screenshot for ${title}`}
-          style={{ height: 180, width: "100%", objectFit: "cover" }}
+          style={{
+            height: 180,
+            width: "100%",
+            objectFit: "cover",
+            objectPosition: "top",
+          }}
         />
       }
       styles={{ body: { padding: 16 } }}
@@ -70,4 +77,3 @@ export const WebsiteCard: React.FC<WebsiteCardProps> = ({
     </Card>
   );
 };
-

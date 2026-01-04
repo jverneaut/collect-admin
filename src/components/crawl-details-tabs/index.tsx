@@ -3,6 +3,7 @@ import { useCustomMutation } from "@refinedev/core";
 import { Button, Card, Descriptions, Empty, Select, Space, Table, Tag, Tabs, Typography } from "antd";
 import React, { useEffect, useMemo, useState } from "react";
 import type { CrawlCategory, CrawlTask, CrawlTechnology, Screenshot, UrlCrawl } from "../../types/collect";
+import { getDisplayImageSrc } from "../../lib/media";
 
 export type CrawlDetailsTabsProps = {
   crawl?: UrlCrawl | null;
@@ -171,9 +172,14 @@ export const CrawlDetailsTabs: React.FC<CrawlDetailsTabsProps> = ({ crawl, onUpd
                   style={{ width: 360 }}
                   cover={
                     <img
-                      src={s.publicUrl ?? "/placeholder-site.svg"}
+                      src={getDisplayImageSrc(s.publicUrl)}
                       alt={`Screenshot ${s.kind}`}
-                      style={{ height: 200, width: "100%", objectFit: "cover" }}
+                      style={{
+                        height: 200,
+                        width: "100%",
+                        objectFit: "cover",
+                        objectPosition: "top",
+                      }}
                     />
                   }
                 >

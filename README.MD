@@ -21,6 +21,7 @@ This admin targets `collect-api` by default at `http://localhost:3000`.
 
 - Copy `.env.example` to `.env` and adjust `VITE_COLLECT_API_URL` if needed.
 - Start the API (`../collect-api`) then run `npm run dev` here.
+- Screenshots are served by the API from `/storage/*` and are resolved using `VITE_COLLECT_API_URL`.
 
 ## Available Scripts
 

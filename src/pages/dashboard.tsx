@@ -1,9 +1,10 @@
 import type { BaseRecord, HttpError } from "@refinedev/core";
-import { useCustom } from "@refinedev/core";
+import { useCustom, useList } from "@refinedev/core";
 import { List } from "@refinedev/antd";
 import { Card, Space, Table, Tag, Typography } from "antd";
 import React, { useMemo } from "react";
 import { Link } from "react-router";
+import type { Job } from "../types/collect";
 
 type GqlError = { message: string };
 type GqlResponse<T> = { data?: T; errors?: GqlError[] };
@@ -74,6 +75,12 @@ export const Dashboard: React.FC = () => {
     queryOptions: { refetchInterval: 5000 },
   });
 
+  const { query: jobsQuery, result: jobsResult } = useList<Job, HttpError>({
+    resource: "jobs",
+    pagination: { mode: "off" },
+    queryOptions: { refetchInterval: 2000 },
+  });
+
   const response = result.data as unknown as GqlResponse<DashboardQueryData>;
 
   const errors = response?.errors ?? [];
@@ -112,9 +119,31 @@ export const Dashboard: React.FC = () => {
     return rows;
   }, [domains]);
 
+  const jobs = useMemo(() => jobsResult.data ?? [], [jobsResult.data]);
+  const activeJobs = useMemo(
+    () => jobs.filter((j) => j.status === "QUEUED" || j.status === "RUNNING"),
+    [jobs]
+  );
+
   return (
     <List title="Dashboard">
       <Space direction="vertical" size={16} style={{ width: "100%" }}>
+        <Card size="small">
+          <Space wrap style={{ justifyContent: "space-between", width: "100%" }}>
+            <Space wrap>
+              <Typography.Text strong>Jobs</Typography.Text>
+              <Tag color={activeJobs.length ? "blue" : "default"}>{activeJobs.length} active</Tag>
+              <Typography.Text type="secondary">Auto-refresh: 2s</Typography.Text>
+            </Space>
+            <Link to="/jobs">Open jobs</Link>
+          </Space>
+          {jobsQuery.isError ? (
+            <Typography.Paragraph type="danger" style={{ marginTop: 12, marginBottom: 0 }}>
+              Jobs error: {(jobsQuery.error as HttpError).message}
+            </Typography.Paragraph>
+          ) : null}
+        </Card>
+
         <Card size="small">
           <Space wrap style={{ justifyContent: "space-between", width: "100%" }}>
             <Space wrap>

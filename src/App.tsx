@@ -17,6 +17,7 @@ import {
   AppstoreOutlined,
   DashboardOutlined,
   GlobalOutlined,
+  PlayCircleOutlined,
   TagsOutlined,
 } from "@ant-design/icons";
 import { ColorModeContextProvider } from "./contexts/color-mode";
@@ -32,6 +33,8 @@ import {
   DomainCreate,
   DomainList,
   DomainShow,
+  JobList,
+  JobShow,
   TechnologyCreate,
   TechnologyEdit,
   TechnologyList,
@@ -83,6 +86,12 @@ function App() {
                     meta: { icon: <AppstoreOutlined /> },
                   },
                   {
+                    name: "jobs",
+                    list: "/jobs",
+                    show: "/jobs/show/:id",
+                    meta: { icon: <PlayCircleOutlined /> },
+                  },
+                  {
                     name: "urls",
                     show: "/domains/:domainId/urls/show/:id",
                     meta: { hide: true },
@@ -124,6 +133,10 @@ function App() {
                       <Route path="create" element={<TechnologyCreate />} />
                       <Route path="edit/:id" element={<TechnologyEdit />} />
                       <Route path="show/:id" element={<TechnologyShow />} />
+                    </Route>
+                    <Route path="/jobs">
+                      <Route index element={<JobList />} />
+                      <Route path="show/:id" element={<JobShow />} />
                     </Route>
                     <Route path="/domains/:domainId/urls/show/:id" element={<UrlShow />} />
                     <Route path="*" element={<ErrorComponent />} />

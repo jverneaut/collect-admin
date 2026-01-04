@@ -94,6 +94,11 @@ export function collectApiDataProvider(baseUrl: string): DataProvider {
           return { data: data.items, total: data.items.length };
         }
 
+        if (params.resource === "jobs") {
+          const data = await requestJson<{ items: TData[] }>(buildUrl(baseUrl, "/jobs"));
+          return { data: data.items, total: data.items.length };
+        }
+
         if (params.resource === "urls") {
           const domainId = (params.meta as { domainId?: string } | undefined)?.domainId;
           if (!domainId) throw toHttpError(new Error("Missing meta.domainId for urls resource"), 400);
@@ -122,6 +127,8 @@ export function collectApiDataProvider(baseUrl: string): DataProvider {
               includeUrls: true,
               includeLatestCrawls: true,
               includeProfile: true,
+              includeDerived: true,
+              derivedPreferStatus: "SUCCESS",
               latestCrawlStatus: "ANY",
             })
           );
@@ -135,6 +142,11 @@ export function collectApiDataProvider(baseUrl: string): DataProvider {
 
         if (params.resource === "technologies") {
           const data = await requestJson<TData>(buildUrl(baseUrl, `/technologies/${params.id}`));
+          return { data };
+        }
+
+        if (params.resource === "jobs") {
+          const data = await requestJson<TData>(buildUrl(baseUrl, `/jobs/${params.id}`));
           return { data };
         }
 

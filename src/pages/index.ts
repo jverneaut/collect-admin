@@ -3,6 +3,8 @@ export { DomainCreate } from "./domains/create";
 export { DomainShow } from "./domains/show";
 export { UrlShow } from "./urls/show";
 export { Dashboard } from "./dashboard";
+export { JobList } from "./jobs/list";
+export { JobShow } from "./jobs/show";
 export { CategoryList } from "./categories/list";
 export { CategoryCreate } from "./categories/create";
 export { CategoryEdit } from "./categories/edit";
