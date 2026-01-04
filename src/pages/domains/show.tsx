@@ -4,7 +4,7 @@ import { useCreate, useNavigation, useShow } from "@refinedev/core";
 import { Button, Descriptions, Form, Input, List as AntdList, Modal, Select, Space, Switch, Tabs, Typography } from "antd";
 import React, { useMemo, useState } from "react";
 import { Link } from "react-router";
-import { UrlCrawlExplorer, WebsiteCard } from "../../components";
+import { DomainTimelineExplorer, UrlCrawlExplorer, WebsiteCard } from "../../components";
 import type { Domain, Url } from "../../types/collect";
 
 type CreateUrlVariables = {
@@ -147,23 +147,41 @@ export const DomainShow: React.FC = () => {
           },
           {
             key: "explorer",
-            label: "Crawl Explorer",
+            label: "Timeline",
             children: (
               <Space direction="vertical" size={12} style={{ width: "100%" }}>
-                <Space direction="vertical" size={6} style={{ width: "100%" }}>
-                  <Typography.Text type="secondary">Pick a URL, then scrub its crawl timeline.</Typography.Text>
-                  <Select
-                    value={selectedUrlId ?? undefined}
-                    onChange={(v) => setSelectedUrlId(v)}
-                    style={{ width: "100%" }}
-                    placeholder="Select a URL"
-                    options={urls.map((u) => ({
-                      value: u.id,
-                      label: `${u.type} · ${u.normalizedUrl}`,
-                    }))}
-                  />
-                </Space>
-                {selectedUrlId ? <UrlCrawlExplorer urlId={selectedUrlId} /> : null}
+                <Tabs
+                  defaultActiveKey="site"
+                  items={[
+                    {
+                      key: "site",
+                      label: "Site timeline",
+                      children: <DomainTimelineExplorer domainId={record.id} />,
+                    },
+                    {
+                      key: "url",
+                      label: "Per-URL explorer",
+                      children: (
+                        <Space direction="vertical" size={12} style={{ width: "100%" }}>
+                          <Space direction="vertical" size={6} style={{ width: "100%" }}>
+                            <Typography.Text type="secondary">Pick a URL, then scrub its crawl timeline.</Typography.Text>
+                            <Select
+                              value={selectedUrlId ?? undefined}
+                              onChange={(v) => setSelectedUrlId(v)}
+                              style={{ width: "100%" }}
+                              placeholder="Select a URL"
+                              options={urls.map((u) => ({
+                                value: u.id,
+                                label: `${u.type} · ${u.normalizedUrl}`,
+                              }))}
+                            />
+                          </Space>
+                          {selectedUrlId ? <UrlCrawlExplorer urlId={selectedUrlId} /> : null}
+                        </Space>
+                      ),
+                    },
+                  ]}
+                />
               </Space>
             ),
           },
