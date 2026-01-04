@@ -83,6 +83,7 @@ const DOMAIN_TIMELINE_SNAPSHOT_QUERY = `
           updatedAt
           tasks { id crawlId type status attempts lastAttemptAt startedAt finishedAt error createdAt updatedAt }
           screenshots { id crawlId kind width height format storageKey publicUrl createdAt }
+          sections { id crawlId index format storageKey publicUrl createdAt clip element }
           categories { confidence category { id slug name description } }
           technologies { confidence technology { id slug name websiteUrl } }
         }

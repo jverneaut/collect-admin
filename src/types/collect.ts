@@ -39,6 +39,20 @@ export type Screenshot = {
   createdAt: string;
 };
 
+export type SectionScreenshot = {
+  id: string;
+  crawlId: string;
+  index: number;
+  clipJson?: string | null;
+  elementJson?: string | null;
+  clip?: unknown;
+  element?: unknown;
+  format?: string | null;
+  storageKey?: string | null;
+  publicUrl?: string | null;
+  createdAt: string;
+};
+
 export type Job = {
   id: string;
   type: string;
@@ -55,7 +69,7 @@ export type Job = {
 export type CrawlTask = {
   id: string;
   crawlId: string;
-  type: "SCREENSHOT" | "TECHNOLOGIES" | "CATEGORIES" | "CONTENT" | "COLORS" | string;
+  type: "SCREENSHOT" | "TECHNOLOGIES" | "SECTIONS" | "CATEGORIES" | "CONTENT" | "COLORS" | string;
   status: "PENDING" | "RUNNING" | "SUCCESS" | "FAILED" | string;
   attempts: number;
   lastAttemptAt?: string | null;
@@ -98,6 +112,7 @@ export type UrlCrawl = {
   createdAt: string;
   updatedAt: string;
   screenshots?: Screenshot[];
+  sections?: SectionScreenshot[];
   tasks?: CrawlTask[];
   categories?: CrawlCategory[];
   technologies?: CrawlTechnology[];

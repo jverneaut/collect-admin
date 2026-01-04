@@ -2,7 +2,7 @@ import type { HttpError } from "@refinedev/core";
 import { useCustomMutation } from "@refinedev/core";
 import { Button, Card, Descriptions, Empty, Select, Space, Table, Tag, Tabs, Typography } from "antd";
 import React, { useEffect, useMemo, useState } from "react";
-import type { CrawlCategory, CrawlTask, CrawlTechnology, Screenshot, UrlCrawl } from "../../types/collect";
+import type { CrawlCategory, CrawlTask, CrawlTechnology, Screenshot, SectionScreenshot, UrlCrawl } from "../../types/collect";
 import { getDisplayImageSrc } from "../../lib/media";
 
 export type CrawlDetailsTabsProps = {
@@ -17,6 +17,7 @@ function formatDate(value?: string | null) {
 
 export const CrawlDetailsTabs: React.FC<CrawlDetailsTabsProps> = ({ crawl, onUpdated }) => {
   const screenshots = useMemo(() => crawl?.screenshots ?? [], [crawl?.screenshots]);
+  const sections = useMemo(() => crawl?.sections ?? [], [crawl?.sections]);
   const tasks = useMemo(() => crawl?.tasks ?? [], [crawl?.tasks]);
   const categories = useMemo(() => crawl?.categories ?? [], [crawl?.categories]);
   const technologies = useMemo(() => crawl?.technologies ?? [], [crawl?.technologies]);
@@ -196,6 +197,42 @@ export const CrawlDetailsTabs: React.FC<CrawlDetailsTabsProps> = ({ crawl, onUpd
             </Space>
           ) : (
             <Empty description="No screenshots" />
+          ),
+        },
+        {
+          key: "sections",
+          label: `Sections (${sections.length})`,
+          children: sections.length ? (
+            <Space size={16} wrap>
+              {sections.map((s: SectionScreenshot) => (
+                <Card
+                  key={s.id}
+                  title={`Section ${s.index}`}
+                  size="small"
+                  style={{ width: 360 }}
+                  cover={
+                    <img
+                      src={getDisplayImageSrc(s.publicUrl)}
+                      alt={`Section ${s.index}`}
+                      style={{
+                        height: 200,
+                        width: "100%",
+                        objectFit: "cover",
+                        objectPosition: "top",
+                      }}
+                    />
+                  }
+                >
+                  <Space direction="vertical" size={0}>
+                    <Typography.Text type="secondary">Created: {formatDate(s.createdAt)}</Typography.Text>
+                    <Typography.Text type="secondary">Format: {s.format ?? "-"}</Typography.Text>
+                    <Typography.Text type="secondary">Public URL: {s.publicUrl ?? "-"}</Typography.Text>
+                  </Space>
+                </Card>
+              ))}
+            </Space>
+          ) : (
+            <Empty description="No sections" />
           ),
         },
         {

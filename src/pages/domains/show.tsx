@@ -1,11 +1,12 @@
 import { Show } from "@refinedev/antd";
 import type { HttpError } from "@refinedev/core";
 import { useCreate, useCustom, useCustomMutation, useList, useNavigation, useOne, useShow } from "@refinedev/core";
-import { Button, Card, Descriptions, Drawer, Form, Input, List as AntdList, Modal, Select, Space, Switch, Tabs, Tag, Typography } from "antd";
+import { Button, Card, Col, Descriptions, Drawer, Form, Input, List as AntdList, Modal, Row, Select, Space, Switch, Tabs, Tag, Typography } from "antd";
 import React, { useMemo, useState } from "react";
 import { Link } from "react-router";
 import { CrawlDetailsTabs, DomainTimelineExplorer, UrlCrawlExplorer, WebsiteCard } from "../../components";
 import type { Domain, Job, Url, UrlCrawl } from "../../types/collect";
+import { getDisplayImageSrc } from "../../lib/media";
 
 type GqlError = { message: string };
 type GqlResponse<T> = { data?: T; errors?: GqlError[] };
@@ -121,6 +122,13 @@ export const DomainShow: React.FC = () => {
   const derived = record?.derived;
   const derivedCategories = derived?.categories?.map((c) => c.name).filter(Boolean) ?? [];
   const derivedTechnologies = derived?.technologies?.map((t) => t.name).filter(Boolean) ?? [];
+  const homepageSections = derived?.homepageLatestCrawl?.sections ?? [];
+  const homepageSectionsPreview = homepageSections.slice(0, 8);
+
+  const [hoveredSectionId, setHoveredSectionId] = useState<string | null>(null);
+  const [sectionViewerOpen, setSectionViewerOpen] = useState(false);
+  const [sectionViewerSrc, setSectionViewerSrc] = useState<string | null>(null);
+  const [sectionViewerTitle, setSectionViewerTitle] = useState<string | null>(null);
 
   const domainJobs = useMemo(() => {
     const jobs = jobsResult.data ?? [];
@@ -218,6 +226,127 @@ export const DomainShow: React.FC = () => {
                     )}
                   </Descriptions.Item>
                 </Descriptions>
+
+                <Space direction="vertical" size={8} style={{ width: "100%" }}>
+                  <Space wrap style={{ justifyContent: "space-between", width: "100%" }}>
+                    <Typography.Title level={4} style={{ margin: 0 }}>
+                      Homepage sections
+                    </Typography.Title>
+                    <Typography.Text type="secondary">
+                      {derived?.homepageLatestCrawl?.id ? `crawl: ${derived.homepageLatestCrawl.id}` : "crawl: -"}
+                    </Typography.Text>
+                  </Space>
+
+                  {homepageSectionsPreview.length ? (
+                    <Row gutter={[16, 16]}>
+                      {homepageSectionsPreview.map((section) => (
+                        <Col key={section.id} xs={24} md={12}>
+                          <Card
+                            hoverable
+                            styles={{ body: { padding: 12 } }}
+                            cover={
+                              <div
+                                style={{
+                                  position: "relative",
+                                  width: "100%",
+                                  aspectRatio: "16 / 9",
+                                  overflow: "hidden",
+                                }}
+                              >
+                                <img
+                                  src={getDisplayImageSrc(section.publicUrl)}
+                                  alt={`Section ${section.index}`}
+                                  style={{
+                                    position: "absolute",
+                                    inset: 0,
+                                    height: "100%",
+                                    width: "100%",
+                                    objectFit: "cover",
+                                    objectPosition: "top",
+                                    display: "block",
+                                  }}
+                                />
+                                <div
+                                  style={{
+                                    position: "absolute",
+                                    inset: 0,
+                                    display: "flex",
+                                    alignItems: "flex-end",
+                                    justifyContent: "flex-end",
+                                    padding: 10,
+                                    background: "linear-gradient(to top, rgba(0,0,0,0.55), rgba(0,0,0,0))",
+                                    opacity: hoveredSectionId === section.id ? 1 : 0,
+                                    transition: "opacity 120ms ease",
+                                    pointerEvents: hoveredSectionId === section.id ? "auto" : "none",
+                                  }}
+                                >
+                                  <Button
+                                    size="small"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      setSectionViewerTitle(`Section ${section.index}`);
+                                      setSectionViewerSrc(section.publicUrl ?? null);
+                                      setSectionViewerOpen(true);
+                                    }}
+                                  >
+                                    View section
+                                  </Button>
+                                </div>
+                              </div>
+                            }
+                            onMouseEnter={() => setHoveredSectionId(section.id)}
+                            onMouseLeave={() => setHoveredSectionId((id) => (id === section.id ? null : id))}
+                          >
+                            <Space direction="vertical" size={0} style={{ width: "100%" }}>
+                              <Typography.Text strong>Section {section.index}</Typography.Text>
+                              <Typography.Text type="secondary">
+                                {section.format ?? "-"}
+                              </Typography.Text>
+                            </Space>
+                          </Card>
+                        </Col>
+                      ))}
+                    </Row>
+                  ) : (
+                    <Typography.Text type="secondary">
+                      No sections yet. Check the crawl’s task list for a `SECTIONS` task status/error.
+                    </Typography.Text>
+                  )}
+
+                  <Modal
+                    title={sectionViewerTitle ?? "Section"}
+                    open={sectionViewerOpen}
+                    onCancel={() => setSectionViewerOpen(false)}
+                    footer={null}
+                    centered
+                    width={1240}
+                    styles={{ body: { padding: 0 } }}
+                  >
+                    <div
+                      style={{
+                        maxHeight: "calc(100vh - 220px)",
+                        overflowY: "auto",
+                        overflowX: "auto",
+                        padding: 16,
+                        textAlign: "center",
+                        background: "#0b1020",
+                      }}
+                    >
+                      <img
+                        src={getDisplayImageSrc(sectionViewerSrc)}
+                        alt={sectionViewerTitle ?? "Section"}
+                        style={{
+                          width: "min(100%, 1180px)",
+                          height: "auto",
+                          display: "block",
+                          margin: "0 auto",
+                          background: "#fff",
+                          borderRadius: 8,
+                        }}
+                      />
+                    </div>
+                  </Modal>
+                </Space>
 
                 <Space direction="vertical" size={8} style={{ width: "100%" }}>
                   <Typography.Title level={4} style={{ margin: 0 }}>

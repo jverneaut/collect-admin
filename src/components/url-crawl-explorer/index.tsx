@@ -64,7 +64,7 @@ export const UrlCrawlExplorer: React.FC<UrlCrawlExplorerProps> = ({ urlId, pollI
                 loading={createCrawlMutation.isPending}
                 onClick={() => {
                   createCrawl(
-                    { resource: "crawls", meta: { urlId }, values: { tasks: ["SCREENSHOT", "TECHNOLOGIES", "CATEGORIES", "CONTENT", "COLORS"] } },
+                    { resource: "crawls", meta: { urlId }, values: { tasks: ["SCREENSHOT", "TECHNOLOGIES", "SECTIONS", "CATEGORIES", "CONTENT", "COLORS"] } },
                     { onSuccess: () => crawlsQuery.refetch() }
                   );
                 }}
