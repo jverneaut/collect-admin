@@ -56,6 +56,7 @@ export const DomainList: React.FC = () => {
                 url={domain.canonicalUrl}
                 description={description}
                 screenshotSrc={screenshotSrc}
+                enableScreenshotViewer
                 tags={[
                   homepageCrawl?.status ? { label: `crawl: ${homepageCrawl.status}`, color: homepageCrawl.status === "SUCCESS" ? "green" : "default" } : { label: "crawl: n/a" },
                   ...(categories.length ? [{ label: categories.slice(0, 2).join(" · ") }] : []),

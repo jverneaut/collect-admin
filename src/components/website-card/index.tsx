@@ -1,5 +1,5 @@
-import { Card, Space, Tag, Typography } from "antd";
-import React from "react";
+import { Button, Card, Modal, Space, Tag, Typography } from "antd";
+import React, { useMemo, useRef, useState } from "react";
 import { getDisplayImageSrc } from "../../lib/media";
 
 type WebsiteCardTag = {
@@ -12,6 +12,7 @@ export type WebsiteCardProps = {
   url: string;
   description?: string | null;
   screenshotSrc?: string;
+  enableScreenshotViewer?: boolean;
   tags?: WebsiteCardTag[];
   extra?: React.ReactNode;
   onClick?: () => void;
@@ -22,26 +23,73 @@ export const WebsiteCard: React.FC<WebsiteCardProps> = ({
   url,
   description,
   screenshotSrc,
+  enableScreenshotViewer = false,
   tags = [],
   extra,
   onClick,
 }) => {
   const imgSrc = getDisplayImageSrc(screenshotSrc);
+  const [isHovered, setIsHovered] = useState(false);
+  const [viewerOpen, setViewerOpen] = useState(false);
+  const ignoreNextCardClickRef = useRef(false);
+
+  const canPreview = useMemo(() => Boolean(enableScreenshotViewer && screenshotSrc), [enableScreenshotViewer, screenshotSrc]);
   return (
     <Card
       hoverable={!!onClick}
-      onClick={onClick}
+      onClick={() => {
+        if (ignoreNextCardClickRef.current) {
+          ignoreNextCardClickRef.current = false;
+          return;
+        }
+        onClick?.();
+      }}
       cover={
-        <img
-          src={imgSrc}
-          alt={`Screenshot for ${title}`}
-          style={{
-            height: 180,
-            width: "100%",
-            objectFit: "cover",
-            objectPosition: "top",
-          }}
-        />
+        <div
+          onMouseEnter={() => setIsHovered(true)}
+          onMouseLeave={() => setIsHovered(false)}
+          style={{ position: "relative" }}
+        >
+          <img
+            src={imgSrc}
+            alt={`Screenshot for ${title}`}
+            style={{
+              height: 220,
+              width: "100%",
+              objectFit: "cover",
+              objectPosition: "top",
+              display: "block",
+            }}
+          />
+
+          {canPreview ? (
+            <div
+              style={{
+                position: "absolute",
+                inset: 0,
+                display: "flex",
+                alignItems: "flex-end",
+                justifyContent: "flex-end",
+                padding: 10,
+                background: isHovered ? "linear-gradient(to top, rgba(0,0,0,0.55), rgba(0,0,0,0))" : "transparent",
+                opacity: isHovered ? 1 : 0,
+                transition: "opacity 120ms ease",
+                pointerEvents: isHovered ? "auto" : "none",
+              }}
+            >
+              <Button
+                size="small"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  ignoreNextCardClickRef.current = true;
+                  setViewerOpen(true);
+                }}
+              >
+                View screenshot
+              </Button>
+            </div>
+          ) : null}
+        </div>
       }
       styles={{ body: { padding: 16 } }}
       actions={extra ? [extra] : undefined}
@@ -74,6 +122,47 @@ export const WebsiteCard: React.FC<WebsiteCardProps> = ({
           </Space>
         ) : null}
       </Space>
+
+      <Modal
+        title={title}
+        open={viewerOpen}
+        onCancel={(e) => {
+          e?.stopPropagation?.();
+          ignoreNextCardClickRef.current = true;
+          setViewerOpen(false);
+          window.setTimeout(() => {
+            ignoreNextCardClickRef.current = false;
+          }, 250);
+        }}
+        footer={null}
+        centered
+        width={1240}
+        styles={{ body: { padding: 0 } }}
+      >
+        <div
+          style={{
+            maxHeight: "calc(100vh - 220px)",
+            overflowY: "auto",
+            overflowX: "auto",
+            padding: 16,
+            textAlign: "center",
+            background: "#0b1020",
+          }}
+        >
+          <img
+            src={imgSrc}
+            alt={`Full screenshot for ${title}`}
+            style={{
+              width: "min(100%, 1180px)",
+              height: "auto",
+              display: "block",
+              margin: "0 auto",
+              background: "#fff",
+              borderRadius: 8,
+            }}
+          />
+        </div>
+      </Modal>
     </Card>
   );
 };

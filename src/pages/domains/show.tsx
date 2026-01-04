@@ -179,6 +179,7 @@ export const DomainShow: React.FC = () => {
                   url={record.canonicalUrl}
                   description={record.profile?.description ?? null}
                   screenshotSrc={record.derived?.screenshot?.publicUrl ?? undefined}
+                  enableScreenshotViewer
                   tags={[
                     { label: `host: ${record.host}` },
                     { label: `urls: ${record.urlsCount ?? urls.length}` },
@@ -236,6 +237,7 @@ export const DomainShow: React.FC = () => {
                             title={`${url.type} · ${url.path}`}
                             url={url.normalizedUrl}
                             screenshotSrc={screenshotSrc}
+                            enableScreenshotViewer
                             tags={[
                               { label: `type: ${url.type}` },
                               latest?.status

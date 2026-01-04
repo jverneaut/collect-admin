@@ -254,6 +254,7 @@ export const DomainTimelineExplorer: React.FC<DomainTimelineExplorerProps> = ({
         url={domain.canonicalUrl}
         description={domain.profile?.description ?? null}
         screenshotSrc={mainScreenshotSrc}
+        enableScreenshotViewer
         tags={[
           { label: `urls: ${urls.length}` },
           { label: `crawl runs: ${timeline.length}` },
@@ -380,6 +381,7 @@ export const DomainTimelineExplorer: React.FC<DomainTimelineExplorerProps> = ({
                   title={`${url.type} · ${url.path}`}
                   url={url.normalizedUrl}
                   screenshotSrc={screenshot}
+                  enableScreenshotViewer
                   tags={[
                     crawl?.status
                       ? { label: `crawl: ${crawl.status}`, color: crawl.status === "SUCCESS" ? "green" : crawl.status === "FAILED" ? "red" : "default" }
