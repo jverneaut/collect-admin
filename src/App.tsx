@@ -1,31 +1,97 @@
-import { GitHubBanner, Refine, WelcomePage } from "@refinedev/core";
+import { Refine } from "@refinedev/core";
 import { DevtoolsPanel, DevtoolsProvider } from "@refinedev/devtools";
 import { RefineKbar, RefineKbarProvider } from "@refinedev/kbar";
 
+import { ErrorComponent, ThemedLayout } from "@refinedev/antd";
 import { useNotificationProvider } from "@refinedev/antd";
 import "@refinedev/antd/dist/reset.css";
 
 import routerProvider, {
   DocumentTitleHandler,
+  NavigateToResource,
   UnsavedChangesNotifier,
 } from "@refinedev/react-router";
-import dataProvider from "@refinedev/simple-rest";
 import { App as AntdApp } from "antd";
-import { BrowserRouter, Route, Routes } from "react-router";
+import { BrowserRouter, Outlet, Route, Routes } from "react-router";
+import {
+  AppstoreOutlined,
+  DashboardOutlined,
+  GlobalOutlined,
+  TagsOutlined,
+} from "@ant-design/icons";
 import { ColorModeContextProvider } from "./contexts/color-mode";
+import { Header } from "./components";
+import { authProvider } from "./providers/authProvider";
+import { collectApiDataProvider } from "./providers/collectApiDataProvider";
+import {
+  CategoryCreate,
+  CategoryEdit,
+  CategoryList,
+  CategoryShow,
+  Dashboard,
+  DomainCreate,
+  DomainList,
+  DomainShow,
+  TechnologyCreate,
+  TechnologyEdit,
+  TechnologyList,
+  TechnologyShow,
+  UrlShow,
+} from "./pages";
 
 function App() {
+  const apiUrl = import.meta.env.VITE_COLLECT_API_URL ?? "http://localhost:3000";
+
   return (
     <BrowserRouter>
-      <GitHubBanner />
       <RefineKbarProvider>
         <ColorModeContextProvider>
           <AntdApp>
             <DevtoolsProvider>
               <Refine
-                dataProvider={dataProvider("https://api.fake-rest.refine.dev")}
+                dataProvider={collectApiDataProvider(apiUrl)}
+                authProvider={authProvider}
                 notificationProvider={useNotificationProvider}
                 routerProvider={routerProvider}
+                resources={[
+                  {
+                    name: "dashboard",
+                    list: "/dashboard",
+                    meta: { icon: <DashboardOutlined /> },
+                  },
+                  {
+                    name: "domains",
+                    list: "/domains",
+                    create: "/domains/create",
+                    show: "/domains/show/:id",
+                    meta: { icon: <GlobalOutlined /> },
+                  },
+                  {
+                    name: "categories",
+                    list: "/categories",
+                    create: "/categories/create",
+                    edit: "/categories/edit/:id",
+                    show: "/categories/show/:id",
+                    meta: { icon: <TagsOutlined /> },
+                  },
+                  {
+                    name: "technologies",
+                    list: "/technologies",
+                    create: "/technologies/create",
+                    edit: "/technologies/edit/:id",
+                    show: "/technologies/show/:id",
+                    meta: { icon: <AppstoreOutlined /> },
+                  },
+                  {
+                    name: "urls",
+                    show: "/domains/:domainId/urls/show/:id",
+                    meta: { hide: true },
+                  },
+                  {
+                    name: "crawls",
+                    meta: { hide: true },
+                  },
+                ]}
                 options={{
                   syncWithLocation: true,
                   warnWhenUnsavedChanges: true,
@@ -33,7 +99,35 @@ function App() {
                 }}
               >
                 <Routes>
-                  <Route index element={<WelcomePage />} />
+                  <Route
+                    element={
+                      <ThemedLayout Header={Header}>
+                        <Outlet />
+                      </ThemedLayout>
+                    }
+                  >
+                    <Route index element={<NavigateToResource resource="dashboard" />} />
+                    <Route path="/dashboard" element={<Dashboard />} />
+                    <Route path="/domains">
+                      <Route index element={<DomainList />} />
+                      <Route path="create" element={<DomainCreate />} />
+                      <Route path="show/:id" element={<DomainShow />} />
+                    </Route>
+                    <Route path="/categories">
+                      <Route index element={<CategoryList />} />
+                      <Route path="create" element={<CategoryCreate />} />
+                      <Route path="edit/:id" element={<CategoryEdit />} />
+                      <Route path="show/:id" element={<CategoryShow />} />
+                    </Route>
+                    <Route path="/technologies">
+                      <Route index element={<TechnologyList />} />
+                      <Route path="create" element={<TechnologyCreate />} />
+                      <Route path="edit/:id" element={<TechnologyEdit />} />
+                      <Route path="show/:id" element={<TechnologyShow />} />
+                    </Route>
+                    <Route path="/domains/:domainId/urls/show/:id" element={<UrlShow />} />
+                    <Route path="*" element={<ErrorComponent />} />
+                  </Route>
                 </Routes>
                 <RefineKbar />
                 <UnsavedChangesNotifier />

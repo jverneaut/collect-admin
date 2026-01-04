@@ -15,6 +15,13 @@ A React Framework for building internal tools, admin panels, dashboards & B2B ap
 
 Refine's hooks and components simplifies the development process and eliminates the repetitive tasks by providing industry-standard solutions for crucial aspects of a project, including authentication, access control, routing, networking, state management, and i18n.
 
+## Local API
+
+This admin targets `collect-api` by default at `http://localhost:3000`.
+
+- Copy `.env.example` to `.env` and adjust `VITE_COLLECT_API_URL` if needed.
+- Start the API (`../collect-api`) then run `npm run dev` here.
+
 ## Available Scripts
 
 ### Running the development server.

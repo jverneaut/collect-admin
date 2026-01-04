@@ -34,9 +34,9 @@
     "typescript": "^5.8.3"
   },
   "scripts": {
-    "dev": "refine dev",
-    "build": "tsc && refine build",
-    "start": "refine start",
+    "dev": "UPDATE_NOTIFIER_IS_DISABLED=true refine dev",
+    "build": "tsc && UPDATE_NOTIFIER_IS_DISABLED=true refine build",
+    "start": "UPDATE_NOTIFIER_IS_DISABLED=true refine start",
     "refine": "refine"
   },
   "browserslist": {
