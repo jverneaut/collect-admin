@@ -1,11 +1,45 @@
 import { Show } from "@refinedev/antd";
 import type { HttpError } from "@refinedev/core";
-import { useCreate, useList, useNavigation, useShow, useCustomMutation } from "@refinedev/core";
-import { Button, Descriptions, Form, Input, List as AntdList, Modal, Select, Space, Switch, Tabs, Tag, Typography } from "antd";
+import { useCreate, useCustom, useCustomMutation, useList, useNavigation, useOne, useShow } from "@refinedev/core";
+import { Button, Card, Descriptions, Drawer, Form, Input, List as AntdList, Modal, Select, Space, Switch, Tabs, Tag, Typography } from "antd";
 import React, { useMemo, useState } from "react";
 import { Link } from "react-router";
-import { DomainTimelineExplorer, UrlCrawlExplorer, WebsiteCard } from "../../components";
-import type { Domain, Job, Url } from "../../types/collect";
+import { CrawlDetailsTabs, DomainTimelineExplorer, UrlCrawlExplorer, WebsiteCard } from "../../components";
+import type { Domain, Job, Url, UrlCrawl } from "../../types/collect";
+
+type GqlError = { message: string };
+type GqlResponse<T> = { data?: T; errors?: GqlError[] };
+
+type DomainCrawlHistoryData = {
+  domain: (Domain & {
+    urls: Array<
+      Url & {
+        crawls: Array<Pick<UrlCrawl, "id" | "urlId" | "crawlRunId" | "status" | "createdAt">>;
+      }
+    >;
+  }) | null;
+};
+
+const DOMAIN_CRAWL_HISTORY_QUERY = `
+  query DomainCrawlHistory($id: ID!, $urlsLimit: Int = 50, $crawlsLimit: Int = 50) {
+    domain(id: $id) {
+      id
+      urls(limit: $urlsLimit) {
+        id
+        type
+        path
+        normalizedUrl
+        crawls(limit: $crawlsLimit) {
+          id
+          urlId
+          crawlRunId
+          status
+          createdAt
+        }
+      }
+    }
+  }
+`;
 
 type CreateUrlVariables = {
   url: string;
@@ -52,6 +86,36 @@ export const DomainShow: React.FC = () => {
   });
 
   const { mutate: ingestDomain, mutation: ingestMutation } = useCustomMutation<Job, HttpError, Record<string, unknown>>();
+
+  const domainId = record?.id ?? null;
+
+  const { query: historyQuery, result: historyResult } = useCustom<
+    DomainCrawlHistoryData,
+    HttpError,
+    unknown,
+    { query: string; variables: Record<string, unknown> },
+    DomainCrawlHistoryData
+  >({
+    url: "/graphql",
+    method: "post",
+    config: { payload: { query: DOMAIN_CRAWL_HISTORY_QUERY, variables: { id: domainId, urlsLimit: 50, crawlsLimit: 50 } } },
+    queryOptions: { enabled: Boolean(domainId) },
+  });
+
+  const historyResponse = historyResult.data as unknown as GqlResponse<DomainCrawlHistoryData>;
+  const historyErrors = historyResponse?.errors ?? [];
+  const historyDomain = historyResponse?.data?.domain ?? null;
+  const historyUrls = useMemo(() => historyDomain?.urls ?? [], [historyDomain?.urls]);
+
+  const [crawlDrawerOpen, setCrawlDrawerOpen] = useState(false);
+  const [selectedCrawlRef, setSelectedCrawlRef] = useState<{ urlId: string; crawlId: string } | null>(null);
+
+  const { query: crawlQuery, result: crawlResult } = useOne<UrlCrawl, HttpError>({
+    resource: "crawls",
+    id: selectedCrawlRef?.crawlId ?? "",
+    meta: { urlId: selectedCrawlRef?.urlId },
+    queryOptions: { enabled: Boolean(selectedCrawlRef?.urlId && selectedCrawlRef?.crawlId) },
+  });
 
   const urls = useMemo(() => record?.urls ?? [], [record?.urls]);
   const derived = record?.derived;
@@ -195,6 +259,70 @@ export const DomainShow: React.FC = () => {
                     }}
                   />
                 </Space>
+
+                <Space direction="vertical" size={8} style={{ width: "100%" }}>
+                  <Typography.Title level={4} style={{ margin: 0 }}>
+                    Crawl history
+                  </Typography.Title>
+                  <Card size="small" loading={historyQuery.isLoading}>
+                    {historyQuery.isError ? (
+                      <Typography.Text type="danger">{(historyQuery.error as HttpError).message}</Typography.Text>
+                    ) : historyErrors.length ? (
+                      <Typography.Text type="danger">
+                        GraphQL error: {historyErrors.map((e) => e.message).join(" · ")}
+                      </Typography.Text>
+                    ) : (
+                      <AntdList
+                        dataSource={historyUrls}
+                        renderItem={(url) => (
+                          <AntdList.Item key={url.id}>
+                            <Space direction="vertical" size={6} style={{ width: "100%" }}>
+                              <Space wrap style={{ justifyContent: "space-between", width: "100%" }}>
+                                <Space direction="vertical" size={0} style={{ minWidth: 220 }}>
+                                  <Typography.Text strong>{`${url.type} · ${url.path}`}</Typography.Text>
+                                  <Typography.Text type="secondary" ellipsis={{ tooltip: url.normalizedUrl }}>
+                                    {url.normalizedUrl}
+                                  </Typography.Text>
+                                </Space>
+                                <Link to={`/domains/${record.id}/urls/show/${url.id}`}>Open</Link>
+                              </Space>
+
+                              {url.crawls?.length ? (
+                                <Space wrap>
+                                  {url.crawls.map((c) => (
+                                    <Tag
+                                      key={c.id}
+                                      color={
+                                        c.status === "SUCCESS"
+                                          ? "green"
+                                          : c.status === "FAILED"
+                                            ? "red"
+                                            : c.status === "RUNNING"
+                                              ? "blue"
+                                              : "default"
+                                      }
+                                      style={{ cursor: "pointer", userSelect: "none" }}
+                                      onClick={() => {
+                                        setSelectedCrawlRef({ urlId: url.id, crawlId: c.id });
+                                        setCrawlDrawerOpen(true);
+                                      }}
+                                    >
+                                      {new Date(c.createdAt).toLocaleString()} · {c.status}
+                                      {c.crawlRunId ? " · run" : ""}
+                                    </Tag>
+                                  ))}
+                                </Space>
+                              ) : (
+                                <Typography.Text type="secondary">No crawls yet.</Typography.Text>
+                              )}
+                            </Space>
+                          </AntdList.Item>
+                        )}
+                      />
+                    )}
+                  </Card>
+                  <Typography.Text type="secondary">Click a crawl tag to inspect details.</Typography.Text>
+                </Space>
               </Space>
             ),
           },
@@ -316,6 +444,23 @@ export const DomainShow: React.FC = () => {
           },
         ]}
       />
+
+      <Drawer
+        title={selectedCrawlRef ? `Crawl ${selectedCrawlRef.crawlId}` : "Crawl"}
+        open={crawlDrawerOpen}
+        onClose={() => setCrawlDrawerOpen(false)}
+        width={820}
+      >
+        <Card size="small" loading={crawlQuery.isLoading}>
+          <CrawlDetailsTabs
+            crawl={crawlResult ?? null}
+            onUpdated={() => {
+              crawlQuery.refetch();
+              historyQuery.refetch();
+            }}
+          />
+        </Card>
+      </Drawer>
 
       <Modal
         title="Add URL"

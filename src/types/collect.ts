@@ -83,6 +83,7 @@ export type CrawlTechnology = {
 export type UrlCrawl = {
   id: string;
   urlId: string;
+  crawlRunId?: string | null;
   status: "PENDING" | "RUNNING" | "SUCCESS" | "FAILED" | string;
   startedAt?: string | null;
   finishedAt?: string | null;
@@ -102,6 +103,19 @@ export type UrlCrawl = {
   technologies?: CrawlTechnology[];
 };
 
+export type CrawlRun = {
+  id: string;
+  domainId: string;
+  status: "PENDING" | "RUNNING" | "SUCCESS" | "FAILED" | string;
+  jobId?: string | null;
+  startedAt?: string | null;
+  finishedAt?: string | null;
+  error?: string | null;
+  optionsJson?: unknown;
+  createdAt: string;
+  updatedAt: string;
+};
+
 export type Url = {
   id: string;
   domainId: string;
@@ -112,6 +126,7 @@ export type Url = {
   createdAt: string;
   updatedAt: string;
   crawls?: UrlCrawl[];
+  crawlInRun?: UrlCrawl | null;
 };
 
 export type Domain = {
@@ -123,6 +138,7 @@ export type Domain = {
   updatedAt: string;
   urlsCount?: number;
   profile?: DomainProfile | null;
+  crawlRuns?: CrawlRun[];
   derived?: {
     homepageUrl: Url | null;
     homepageLatestCrawl: UrlCrawl | null;
