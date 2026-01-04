@@ -37,8 +37,8 @@ export const DomainCreate: React.FC = () => {
         {...formProps}
         layout="vertical"
         initialValues={{
-          createHomepageUrl: true,
-          createInitialCrawl: true,
+          createHomepageUrl: false,
+          createInitialCrawl: false,
           enqueueIngestion: true,
           ingestion: {
             maxUrls: 20,
@@ -48,7 +48,7 @@ export const DomainCreate: React.FC = () => {
               fullPage: true,
               adblock: true,
               waitMs: 500,
-              timeoutMs: 60000,
+              timeoutMs: 90000,
             },
             technologies: {
               timeoutMs: 60000,
