@@ -187,6 +187,7 @@ export const DomainShow: React.FC = () => {
                   url={record.canonicalUrl}
                   description={record.profile?.description ?? null}
                   screenshotSrc={record.derived?.screenshot?.publicUrl ?? undefined}
+                  prominentColor={record.derived?.screenshot?.prominentColor ?? null}
                   enableScreenshotViewer
                   tags={[
                     { label: `host: ${record.host}` },
@@ -239,12 +240,14 @@ export const DomainShow: React.FC = () => {
                       const categories = latest?.categories?.map((c) => c.category?.name).filter(Boolean) ?? [];
                       const technologies = latest?.technologies?.map((t) => t.technology?.name).filter(Boolean) ?? [];
                       const screenshotSrc = latest?.screenshots?.[0]?.publicUrl ?? undefined;
+                      const prominentColor = latest?.screenshots?.[0]?.prominentColor ?? null;
                       return (
                         <AntdList.Item key={url.id}>
                           <WebsiteCard
                             title={`${url.type} · ${url.path}`}
                             url={url.normalizedUrl}
                             screenshotSrc={screenshotSrc}
+                            prominentColor={prominentColor}
                             enableScreenshotViewer
                             tags={[
                               { label: `type: ${url.type}` },

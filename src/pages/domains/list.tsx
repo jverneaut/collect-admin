@@ -48,6 +48,7 @@ export const DomainList: React.FC = () => {
           const title = domain.profile?.name ?? domain.displayName ?? domain.host;
           const description = domain.profile?.description ?? null;
           const screenshotSrc = homepageCrawl?.screenshots?.[0]?.publicUrl ?? undefined;
+          const prominentColor = homepageCrawl?.screenshots?.[0]?.prominentColor ?? null;
 
           return (
             <AntdList.Item key={domain.id}>
@@ -56,6 +57,7 @@ export const DomainList: React.FC = () => {
                 url={domain.canonicalUrl}
                 description={description}
                 screenshotSrc={screenshotSrc}
+                prominentColor={prominentColor}
                 enableScreenshotViewer
                 tags={[
                   homepageCrawl?.status ? { label: `crawl: ${homepageCrawl.status}`, color: homepageCrawl.status === "SUCCESS" ? "green" : "default" } : { label: "crawl: n/a" },

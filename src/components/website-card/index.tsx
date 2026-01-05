@@ -12,6 +12,7 @@ export type WebsiteCardProps = {
   url: string;
   description?: string | null;
   screenshotSrc?: string;
+  prominentColor?: string | null;
   enableScreenshotViewer?: boolean;
   tags?: WebsiteCardTag[];
   extra?: React.ReactNode;
@@ -23,12 +24,17 @@ export const WebsiteCard: React.FC<WebsiteCardProps> = ({
   url,
   description,
   screenshotSrc,
+  prominentColor,
   enableScreenshotViewer = false,
   tags = [],
   extra,
   onClick,
 }) => {
   const imgSrc = getDisplayImageSrc(screenshotSrc);
+  const prominentColorValue = useMemo(() => {
+    const value = typeof prominentColor === "string" ? prominentColor.trim() : "";
+    return value.length ? value : null;
+  }, [prominentColor]);
   const [isHovered, setIsHovered] = useState(false);
   const [viewerOpen, setViewerOpen] = useState(false);
   const ignoreNextCardClickRef = useRef(false);
@@ -103,6 +109,22 @@ export const WebsiteCard: React.FC<WebsiteCardProps> = ({
             {url}
           </Typography.Text>
         </Space>
+        {prominentColorValue ? (
+          <Space size={8} align="center">
+            <div
+              style={{
+                width: 14,
+                height: 14,
+                borderRadius: 4,
+                background: prominentColorValue,
+                border: "1px solid rgba(0,0,0,0.15)",
+              }}
+            />
+            <Typography.Text type="secondary" style={{ fontSize: 12 }}>
+              {prominentColorValue}
+            </Typography.Text>
+          </Space>
+        ) : null}
         {description ? (
           <Typography.Paragraph
             type="secondary"

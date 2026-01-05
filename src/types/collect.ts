@@ -37,6 +37,7 @@ export type Screenshot = {
   format?: string | null;
   storageKey?: string | null;
   publicUrl?: string | null;
+  prominentColor?: string | null;
   createdAt: string;
 };
 
