@@ -35,12 +35,14 @@ import {
   DomainShow,
   JobList,
   JobShow,
+  ReviewList,
   TechnologyCreate,
   TechnologyEdit,
   TechnologyList,
   TechnologyShow,
   UrlShow,
 } from "./pages";
+import { ReviewMenuIcon } from "./components/review-menu-icon";
 
 function App() {
   const apiUrl = import.meta.env.VITE_COLLECT_API_URL ?? "http://localhost:3000";
@@ -49,7 +51,14 @@ function App() {
     <BrowserRouter>
       <RefineKbarProvider>
         <ColorModeContextProvider>
-          <AntdApp>
+            <AntdApp>
+            <style>
+              {`
+                .ant-menu .ant-menu-item { position: relative; }
+                .collect-review-menu-badge { position: absolute; right: 16px; top: 50%; transform: translateY(-50%); pointer-events: none; }
+                .ant-menu-inline-collapsed .collect-review-menu-badge { display: none; }
+              `}
+            </style>
             <DevtoolsProvider>
               <Refine
                 dataProvider={collectApiDataProvider(apiUrl)}
@@ -61,6 +70,11 @@ function App() {
                     name: "dashboard",
                     list: "/dashboard",
                     meta: { icon: <DashboardOutlined /> },
+                  },
+                  {
+                    name: "review",
+                    list: "/review",
+                    meta: { icon: <ReviewMenuIcon />, label: "Reviews" },
                   },
                   {
                     name: "domains",
@@ -117,6 +131,7 @@ function App() {
                   >
                     <Route index element={<NavigateToResource resource="dashboard" />} />
                     <Route path="/dashboard" element={<Dashboard />} />
+                    <Route path="/review" element={<ReviewList />} />
                     <Route path="/domains">
                       <Route index element={<DomainList />} />
                       <Route path="create" element={<DomainCreate />} />

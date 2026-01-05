@@ -31,6 +31,7 @@ export type Screenshot = {
   id: string;
   crawlId: string;
   kind: "FULL_PAGE" | "VIEWPORT" | string;
+  isPublished?: boolean;
   width?: number | null;
   height?: number | null;
   format?: string | null;
@@ -43,6 +44,7 @@ export type SectionScreenshot = {
   id: string;
   crawlId: string;
   index: number;
+  isPublished?: boolean;
   clipJson?: string | null;
   elementJson?: string | null;
   clip?: unknown;
@@ -99,6 +101,7 @@ export type UrlCrawl = {
   urlId: string;
   crawlRunId?: string | null;
   status: "PENDING" | "RUNNING" | "SUCCESS" | "FAILED" | string;
+  isPublished?: boolean;
   startedAt?: string | null;
   finishedAt?: string | null;
   crawledAt?: string | null;
@@ -122,6 +125,11 @@ export type CrawlRun = {
   id: string;
   domainId: string;
   status: "PENDING" | "RUNNING" | "SUCCESS" | "FAILED" | string;
+  reviewStatus?: "PENDING_REVIEW" | "REVIEWED" | string;
+  reviewedAt?: string | null;
+  isPublished?: boolean;
+  publishedAt?: string | null;
+  tags?: string[];
   jobId?: string | null;
   startedAt?: string | null;
   finishedAt?: string | null;
@@ -149,6 +157,7 @@ export type Domain = {
   host: string;
   canonicalUrl: string;
   displayName?: string | null;
+  isPublished?: boolean;
   createdAt: string;
   updatedAt: string;
   urlsCount?: number;

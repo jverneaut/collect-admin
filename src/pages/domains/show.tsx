@@ -123,7 +123,7 @@ export const DomainShow: React.FC = () => {
   const derivedCategories = derived?.categories?.map((c) => c.name).filter(Boolean) ?? [];
   const derivedTechnologies = derived?.technologies?.map((t) => t.name).filter(Boolean) ?? [];
   const homepageSections = derived?.homepageLatestCrawl?.sections ?? [];
-  const homepageSectionsPreview = homepageSections.slice(0, 8);
+  const homepageSectionsPreview = homepageSections.slice(0, 12);
 
   const [hoveredSectionId, setHoveredSectionId] = useState<string | null>(null);
   const [sectionViewerOpen, setSectionViewerOpen] = useState(false);
@@ -228,6 +228,49 @@ export const DomainShow: React.FC = () => {
                 </Descriptions>
 
                 <Space direction="vertical" size={8} style={{ width: "100%" }}>
+                  <Typography.Title level={4} style={{ margin: 0 }}>
+                    URLs
+                  </Typography.Title>
+                  <AntdList<Url>
+                    dataSource={urls}
+                    grid={{ gutter: 16, xs: 1, sm: 2, md: 2, lg: 3, xl: 3, xxl: 4 }}
+                    renderItem={(url) => {
+                      const latest = url.crawls?.[0];
+                      const categories = latest?.categories?.map((c) => c.category?.name).filter(Boolean) ?? [];
+                      const technologies = latest?.technologies?.map((t) => t.technology?.name).filter(Boolean) ?? [];
+                      const screenshotSrc = latest?.screenshots?.[0]?.publicUrl ?? undefined;
+                      return (
+                        <AntdList.Item key={url.id}>
+                          <WebsiteCard
+                            title={`${url.type} · ${url.path}`}
+                            url={url.normalizedUrl}
+                            screenshotSrc={screenshotSrc}
+                            enableScreenshotViewer
+                            tags={[
+                              { label: `type: ${url.type}` },
+                              latest?.status
+                                ? {
+                                    label: `crawl: ${latest.status}`,
+                                    color: latest.status === "SUCCESS" ? "green" : "default",
+                                  }
+                                : { label: "crawl: n/a" },
+                              ...(categories.length ? [{ label: `cat: ${categories.slice(0, 2).join(" · ")}` }] : []),
+                              ...(technologies.length ? [{ label: `tech: ${technologies.slice(0, 2).join(" · ")}` }] : []),
+                            ]}
+                            extra={
+                              <Space onClick={(e) => e.stopPropagation()}>
+                                <Link to={`/domains/${record.id}/urls/show/${url.id}`}>Open</Link>
+                                <Typography.Link onClick={() => setSelectedUrlId(url.id)}>Explore</Typography.Link>
+                              </Space>
+                            }
+                          />
+                        </AntdList.Item>
+                      );
+                    }}
+                  />
+                </Space>
+
+                <Space direction="vertical" size={8} style={{ width: "100%" }}>
                   <Space wrap style={{ justifyContent: "space-between", width: "100%" }}>
                     <Typography.Title level={4} style={{ margin: 0 }}>
                       Homepage sections
@@ -238,18 +281,19 @@ export const DomainShow: React.FC = () => {
                   </Space>
 
                   {homepageSectionsPreview.length ? (
-                    <Row gutter={[16, 16]}>
+                    <Row gutter={[10, 10]}>
                       {homepageSectionsPreview.map((section) => (
-                        <Col key={section.id} xs={24} md={12}>
+                        <Col key={section.id} xs={12} sm={8} md={6} lg={6} xl={4} xxl={4}>
                           <Card
+                            size="small"
                             hoverable
-                            styles={{ body: { padding: 12 } }}
+                            styles={{ body: { padding: 0 } }}
                             cover={
                               <div
                                 style={{
                                   position: "relative",
                                   width: "100%",
-                                  aspectRatio: "16 / 9",
+                                  height: 120,
                                   overflow: "hidden",
                                 }}
                               >
@@ -266,6 +310,24 @@ export const DomainShow: React.FC = () => {
                                     display: "block",
                                   }}
                                 />
+
+                                <div
+                                  style={{
+                                    position: "absolute",
+                                    left: 8,
+                                    top: 8,
+                                    padding: "2px 6px",
+                                    fontSize: 12,
+                                    lineHeight: "16px",
+                                    color: "#fff",
+                                    background: "rgba(0,0,0,0.55)",
+                                    borderRadius: 6,
+                                    userSelect: "none",
+                                  }}
+                                >
+                                  {section.index}
+                                </div>
+
                                 <div
                                   style={{
                                     position: "absolute",
@@ -273,7 +335,7 @@ export const DomainShow: React.FC = () => {
                                     display: "flex",
                                     alignItems: "flex-end",
                                     justifyContent: "flex-end",
-                                    padding: 10,
+                                    padding: 8,
                                     background: "linear-gradient(to top, rgba(0,0,0,0.55), rgba(0,0,0,0))",
                                     opacity: hoveredSectionId === section.id ? 1 : 0,
                                     transition: "opacity 120ms ease",
@@ -289,21 +351,19 @@ export const DomainShow: React.FC = () => {
                                       setSectionViewerOpen(true);
                                     }}
                                   >
-                                    View section
+                                    View
                                   </Button>
                                 </div>
                               </div>
                             }
                             onMouseEnter={() => setHoveredSectionId(section.id)}
                             onMouseLeave={() => setHoveredSectionId((id) => (id === section.id ? null : id))}
-                          >
-                            <Space direction="vertical" size={0} style={{ width: "100%" }}>
-                              <Typography.Text strong>Section {section.index}</Typography.Text>
-                              <Typography.Text type="secondary">
-                                {section.format ?? "-"}
-                              </Typography.Text>
-                            </Space>
-                          </Card>
+                            onClick={() => {
+                              setSectionViewerTitle(`Section ${section.index}`);
+                              setSectionViewerSrc(section.publicUrl ?? null);
+                              setSectionViewerOpen(true);
+                            }}
+                          />
                         </Col>
                       ))}
                     </Row>
@@ -346,49 +406,6 @@ export const DomainShow: React.FC = () => {
                       />
                     </div>
                   </Modal>
-                </Space>
-
-                <Space direction="vertical" size={8} style={{ width: "100%" }}>
-                  <Typography.Title level={4} style={{ margin: 0 }}>
-                    URLs
-                  </Typography.Title>
-                  <AntdList<Url>
-                    dataSource={urls}
-                    grid={{ gutter: 16, xs: 1, sm: 2, md: 2, lg: 3, xl: 3, xxl: 4 }}
-                    renderItem={(url) => {
-                      const latest = url.crawls?.[0];
-                      const categories = latest?.categories?.map((c) => c.category?.name).filter(Boolean) ?? [];
-                      const technologies = latest?.technologies?.map((t) => t.technology?.name).filter(Boolean) ?? [];
-                      const screenshotSrc = latest?.screenshots?.[0]?.publicUrl ?? undefined;
-                      return (
-                        <AntdList.Item key={url.id}>
-                          <WebsiteCard
-                            title={`${url.type} · ${url.path}`}
-                            url={url.normalizedUrl}
-                            screenshotSrc={screenshotSrc}
-                            enableScreenshotViewer
-                            tags={[
-                              { label: `type: ${url.type}` },
-                              latest?.status
-                                ? {
-                                    label: `crawl: ${latest.status}`,
-                                    color: latest.status === "SUCCESS" ? "green" : "default",
-                                  }
-                                : { label: "crawl: n/a" },
-                              ...(categories.length ? [{ label: `cat: ${categories.slice(0, 2).join(" · ")}` }] : []),
-                              ...(technologies.length ? [{ label: `tech: ${technologies.slice(0, 2).join(" · ")}` }] : []),
-                            ]}
-                            extra={
-                              <Space onClick={(e) => e.stopPropagation()}>
-                                <Link to={`/domains/${record.id}/urls/show/${url.id}`}>Open</Link>
-                                <Typography.Link onClick={() => setSelectedUrlId(url.id)}>Explore</Typography.Link>
-                              </Space>
-                            }
-                          />
-                        </AntdList.Item>
-                      );
-                    }}
-                  />
                 </Space>
 
                 <Space direction="vertical" size={8} style={{ width: "100%" }}>

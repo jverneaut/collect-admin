@@ -13,3 +13,4 @@ export { TechnologyList } from "./technologies/list";
 export { TechnologyCreate } from "./technologies/create";
 export { TechnologyEdit } from "./technologies/edit";
 export { TechnologyShow } from "./technologies/show";
+export { ReviewList } from "./review";
