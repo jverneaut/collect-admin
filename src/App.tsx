@@ -1,7 +1,7 @@
 import { Refine } from "@refinedev/core";
 import { RefineKbar, RefineKbarProvider } from "@refinedev/kbar";
 
-import { ErrorComponent, ThemedLayout } from "@refinedev/antd";
+import { ErrorComponent, ThemedLayout, ThemedSider } from "@refinedev/antd";
 import { useNotificationProvider } from "@refinedev/antd";
 import "@refinedev/antd/dist/reset.css";
 
@@ -135,13 +135,16 @@ function App() {
               }}
             >
               <Routes>
-                <Route
-                  element={
-                    <ThemedLayout Header={Header}>
-                      <Outlet />
-                    </ThemedLayout>
-                  }
-                >
+                  <Route
+                    element={
+                      <ThemedLayout
+                        Header={Header}
+                        Sider={(props) => <ThemedSider {...props} fixed />}
+                      >
+                        <Outlet />
+                      </ThemedLayout>
+                    }
+                  >
                   <Route index element={<NavigateToResource resource="dashboard" />} />
                   <Route path="/dashboard" element={<Dashboard />} />
                   <Route path="/review" element={<ReviewList />} />
