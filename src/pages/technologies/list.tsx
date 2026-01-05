@@ -3,6 +3,7 @@ import type { HttpError } from "@refinedev/core";
 import { Space, Table, Typography } from "antd";
 import React from "react";
 import type { Technology } from "../../types/collect";
+import { getDisplayImageSrc } from "../../lib/media";
 
 export const TechnologyList: React.FC = () => {
   const { tableProps } = useTable<Technology, HttpError>({
@@ -17,6 +18,23 @@ export const TechnologyList: React.FC = () => {
         {...tableProps}
         rowKey="id"
         columns={[
+          {
+            title: "",
+            key: "icon",
+            width: 44,
+            render: (_, record) =>
+              record.iconPublicUrl ? (
+                <img
+                  src={getDisplayImageSrc(record.iconPublicUrl, { placeholder: "/placeholder-site.svg" })}
+                  alt=""
+                  width={20}
+                  height={20}
+                  style={{ display: "block" }}
+                />
+              ) : (
+                "-"
+              ),
+          },
           { title: "Name", dataIndex: "name", key: "name" },
           { title: "Slug", dataIndex: "slug", key: "slug" },
           {
@@ -41,4 +59,3 @@ export const TechnologyList: React.FC = () => {
     </List>
   );
 };
-

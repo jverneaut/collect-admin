@@ -93,7 +93,7 @@ const DOMAIN_TIMELINE_SNAPSHOT_QUERY = `
           screenshots { id crawlId kind isPublished width height format storageKey publicUrl createdAt }
           sections { id crawlId index isPublished format storageKey publicUrl createdAt clip element }
           categories { confidence category { id slug name description } }
-          technologies { confidence technology { id slug name websiteUrl } }
+          technologies { confidence technology { id slug name websiteUrl iconPublicUrl iconContentType } }
         }
       }
     }
@@ -675,7 +675,10 @@ const DomainTimelineExplorerLegacy: React.FC<DomainTimelineExplorerProps> = ({
           renderItem={({ url, crawl }) => {
             const screenshot = crawl?.screenshots?.[0]?.publicUrl ?? "/placeholder-site.svg";
             const cats = crawl?.categories?.map((c) => c.category?.name).filter(Boolean) ?? [];
-            const tech = crawl?.technologies?.map((t) => t.technology?.name).filter(Boolean) ?? [];
+            const tech =
+              crawl?.technologies
+                ?.map((t) => t.technology)
+                .filter((t): t is NonNullable<typeof t> => Boolean(t)) ?? [];
             const canToggle = Boolean(crawl?.id && crawl.status === "SUCCESS" && canPublishSelection);
             const isEnabled = Boolean(crawl?.id && draftPublishedCrawlIds.has(crawl.id));
             const isPendingReview = effectiveRun?.reviewStatus === "PENDING_REVIEW";
@@ -741,7 +744,23 @@ const DomainTimelineExplorerLegacy: React.FC<DomainTimelineExplorerProps> = ({
                         ...(crawl?.id ? [{ label: isEnabled ? "public" : "private", color: isEnabled ? "green" : "default" }] : []),
                         ...(isPendingReview ? [{ label: "click to toggle" }] : []),
                         ...(cats.length ? [{ label: `cat: ${cats.slice(0, 2).join(" · ")}` }] : []),
-                        ...(tech.length ? [{ label: `tech: ${tech.slice(0, 2).join(" · ")}` }] : []),
+                        ...tech.slice(0, 2).map((t) => ({
+                          key: `tech:${t.id ?? t.slug ?? t.name}`,
+                          label: (
+                            <Space size={6}>
+                              {t.iconPublicUrl ? (
+                                <img
+                                  src={getDisplayImageSrc(t.iconPublicUrl, { placeholder: "/placeholder-site.svg" })}
+                                  alt=""
+                                  width={14}
+                                  height={14}
+                                  style={{ display: "block" }}
+                                />
+                              ) : null}
+                              {t.name}
+                            </Space>
+                          ),
+                        })),
                       ]}
                       extra={
                         <Space onClick={(e) => e.stopPropagation()}>
@@ -1324,7 +1343,10 @@ const CrawlRunAccordionPanel: React.FC<{
         renderItem={({ url, crawl }) => {
           const screenshot = crawl?.screenshots?.[0]?.publicUrl ?? "/placeholder-site.svg";
           const cats = crawl?.categories?.map((c) => c.category?.name).filter(Boolean) ?? [];
-          const tech = crawl?.technologies?.map((t) => t.technology?.name).filter(Boolean) ?? [];
+          const tech =
+            crawl?.technologies
+              ?.map((t) => t.technology)
+              .filter((t): t is NonNullable<typeof t> => Boolean(t)) ?? [];
           const canToggle = Boolean(crawl?.id && crawl.status === "SUCCESS" && canPublishSelection);
           const isEnabled = Boolean(crawl?.id && draftPublishedCrawlIds.has(crawl.id));
 
@@ -1389,7 +1411,23 @@ const CrawlRunAccordionPanel: React.FC<{
                         : { label: "not crawled in this run" },
                       ...(crawl?.id ? [{ label: isEnabled ? "public" : "private", color: isEnabled ? "green" : "default" }] : []),
                       ...(cats.length ? [{ label: `cat: ${cats.slice(0, 2).join(" · ")}` }] : []),
-                      ...(tech.length ? [{ label: `tech: ${tech.slice(0, 2).join(" · ")}` }] : []),
+                      ...tech.slice(0, 2).map((t) => ({
+                        key: `tech:${t.id ?? t.slug ?? t.name}`,
+                        label: (
+                          <Space size={6}>
+                            {t.iconPublicUrl ? (
+                              <img
+                                src={getDisplayImageSrc(t.iconPublicUrl, { placeholder: "/placeholder-site.svg" })}
+                                alt=""
+                                width={14}
+                                height={14}
+                                style={{ display: "block" }}
+                              />
+                            ) : null}
+                            {t.name}
+                          </Space>
+                        ),
+                      })),
                     ]}
                     extra={
                       <Space onClick={(e) => e.stopPropagation()}>

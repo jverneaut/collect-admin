@@ -260,7 +260,27 @@ export const CrawlDetailsTabs: React.FC<CrawlDetailsTabsProps> = ({ crawl, onUpd
               dataSource={technologies}
               pagination={{ pageSize: 10 }}
               columns={[
-                { title: "Name", key: "name", render: (_, r) => r.technology?.name ?? "-" },
+                {
+                  title: "Name",
+                  key: "name",
+                  render: (_, r) =>
+                    r.technology ? (
+                      <Space size={8}>
+                        {r.technology.iconPublicUrl ? (
+                          <img
+                            src={getDisplayImageSrc(r.technology.iconPublicUrl, { placeholder: "/placeholder-site.svg" })}
+                            alt=""
+                            width={16}
+                            height={16}
+                            style={{ display: "block" }}
+                          />
+                        ) : null}
+                        <span>{r.technology.name}</span>
+                      </Space>
+                    ) : (
+                      "-"
+                    ),
+                },
                 { title: "Slug", key: "slug", render: (_, r) => r.technology?.slug ?? "-" },
                 { title: "Confidence", dataIndex: "confidence", key: "confidence", render: (v: number | null) => (typeof v === "number" ? v.toFixed(2) : "-") },
                 {

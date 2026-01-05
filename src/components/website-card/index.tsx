@@ -3,7 +3,8 @@ import React, { useMemo, useRef, useState } from "react";
 import { getDisplayImageSrc } from "../../lib/media";
 
 type WebsiteCardTag = {
-  label: string;
+  key?: string;
+  label: React.ReactNode;
   color?: string;
 };
 
@@ -136,8 +137,15 @@ export const WebsiteCard: React.FC<WebsiteCardProps> = ({
         ) : null}
         {tags.length ? (
           <Space size={[6, 6]} wrap>
-            {tags.map((tag) => (
-              <Tag key={tag.label} color={tag.color}>
+            {tags.map((tag, index) => (
+              <Tag
+                key={
+                  tag.key ??
+                  (typeof tag.label === "string" ? tag.label : null) ??
+                  `tag-${index}`
+                }
+                color={tag.color}
+              >
                 {tag.label}
               </Tag>
             ))}

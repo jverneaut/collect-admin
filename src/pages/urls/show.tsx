@@ -6,6 +6,7 @@ import React, { useMemo } from "react";
 import { useParams } from "react-router";
 import { UrlCrawlExplorer } from "../../components";
 import type { Url } from "../../types/collect";
+import { getDisplayImageSrc } from "../../lib/media";
 
 export const UrlShow: React.FC = () => {
   const { domainId, id } = useParams();
@@ -25,7 +26,10 @@ export const UrlShow: React.FC = () => {
     [latest?.categories]
   );
   const technologies = useMemo(
-    () => latest?.technologies?.map((t) => t.technology?.name).filter(Boolean) ?? [],
+    () =>
+      latest?.technologies
+        ?.map((t) => t.technology)
+        .filter((t): t is NonNullable<typeof t> => Boolean(t)) ?? [],
     [latest?.technologies]
   );
 
@@ -55,7 +59,30 @@ export const UrlShow: React.FC = () => {
           <Descriptions.Item label="Latest title">{latest?.title ?? "-"}</Descriptions.Item>
           <Descriptions.Item label="Latest final URL">{latest?.finalUrl ?? "-"}</Descriptions.Item>
           <Descriptions.Item label="Latest categories">{categories.length ? categories.join(" · ") : "-"}</Descriptions.Item>
-          <Descriptions.Item label="Latest technologies">{technologies.length ? technologies.join(" · ") : "-"}</Descriptions.Item>
+          <Descriptions.Item label="Latest technologies">
+            {technologies.length ? (
+              <Space wrap>
+                {technologies.slice(0, 20).map((t) => (
+                  <Tag key={t.id ?? t.slug ?? t.name}>
+                    <Space size={6}>
+                      {t.iconPublicUrl ? (
+                        <img
+                          src={getDisplayImageSrc(t.iconPublicUrl, { placeholder: "/placeholder-site.svg" })}
+                          alt=""
+                          width={14}
+                          height={14}
+                          style={{ display: "block" }}
+                        />
+                      ) : null}
+                      {t.name}
+                    </Space>
+                  </Tag>
+                ))}
+              </Space>
+            ) : (
+              "-"
+            )}
+          </Descriptions.Item>
         </Descriptions>
 
         <UrlCrawlExplorer urlId={urlId} pollIntervalMs={2000} />

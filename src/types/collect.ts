@@ -23,6 +23,8 @@ export type Technology = {
   slug: string;
   name: string;
   websiteUrl?: string | null;
+  iconPublicUrl?: string | null;
+  iconContentType?: string | null;
   createdAt: string;
   updatedAt: string;
 };

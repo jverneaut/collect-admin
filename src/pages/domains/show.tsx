@@ -121,7 +121,7 @@ export const DomainShow: React.FC = () => {
   const urls = useMemo(() => record?.urls ?? [], [record?.urls]);
   const derived = record?.derived;
   const derivedCategories = derived?.categories?.map((c) => c.name).filter(Boolean) ?? [];
-  const derivedTechnologies = derived?.technologies?.map((t) => t.name).filter(Boolean) ?? [];
+  const derivedTechnologies = derived?.technologies ?? [];
   const homepageSections = derived?.homepageLatestCrawl?.sections ?? [];
   const homepageSectionsPreview = homepageSections.slice(0, 12);
 
@@ -219,7 +219,20 @@ export const DomainShow: React.FC = () => {
                     {derivedTechnologies.length ? (
                       <Space wrap>
                         {derivedTechnologies.slice(0, 12).map((t) => (
-                          <Tag key={t}>{t}</Tag>
+                          <Tag key={t.id ?? t.slug ?? t.name}>
+                            <Space size={6}>
+                              {t.iconPublicUrl ? (
+                                <img
+                                  src={getDisplayImageSrc(t.iconPublicUrl, { placeholder: "/placeholder-site.svg" })}
+                                  alt=""
+                                  width={14}
+                                  height={14}
+                                  style={{ display: "block" }}
+                                />
+                              ) : null}
+                              {t.name}
+                            </Space>
+                          </Tag>
                         ))}
                       </Space>
                     ) : (
@@ -238,7 +251,10 @@ export const DomainShow: React.FC = () => {
                     renderItem={(url) => {
                       const latest = url.crawls?.[0];
                       const categories = latest?.categories?.map((c) => c.category?.name).filter(Boolean) ?? [];
-                      const technologies = latest?.technologies?.map((t) => t.technology?.name).filter(Boolean) ?? [];
+                      const technologies =
+                        latest?.technologies
+                          ?.map((t) => t.technology)
+                          .filter((t): t is NonNullable<typeof t> => Boolean(t)) ?? [];
                       const screenshotSrc = latest?.screenshots?.[0]?.publicUrl ?? undefined;
                       const prominentColor = latest?.screenshots?.[0]?.prominentColor ?? null;
                       return (
@@ -258,7 +274,23 @@ export const DomainShow: React.FC = () => {
                                   }
                                 : { label: "crawl: n/a" },
                               ...(categories.length ? [{ label: `cat: ${categories.slice(0, 2).join(" · ")}` }] : []),
-                              ...(technologies.length ? [{ label: `tech: ${technologies.slice(0, 2).join(" · ")}` }] : []),
+                              ...technologies.slice(0, 2).map((t) => ({
+                                key: `tech:${t.id ?? t.slug ?? t.name}`,
+                                label: (
+                                  <Space size={6}>
+                                    {t.iconPublicUrl ? (
+                                      <img
+                                        src={getDisplayImageSrc(t.iconPublicUrl, { placeholder: "/placeholder-site.svg" })}
+                                        alt=""
+                                        width={14}
+                                        height={14}
+                                        style={{ display: "block" }}
+                                      />
+                                    ) : null}
+                                    {t.name}
+                                  </Space>
+                                ),
+                              })),
                             ]}
                             extra={
                               <Space onClick={(e) => e.stopPropagation()}>
